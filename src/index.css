@@ -1,0 +1,219 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  font-family: 'Montserrat', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top left, rgba(236, 72, 153, 0.18), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(79, 70, 229, 0.16), transparent 30%),
+    linear-gradient(180deg, #fffbfe 0%, #f8f1ff 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+input::placeholder {
+  color: rgba(15, 23, 42, 0.35);
+}
+
+.envelope-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fdf4ff 100%);
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  box-shadow: 0 25px 65px rgba(131, 58, 180, 0.12);
+}
+
+.envelope-shell {
+  position: relative;
+  width: min(380px, 100%);
+  aspect-ratio: 5 / 3;
+  background: linear-gradient(180deg, #fef1fb 0%, #f1e7fd 65%);
+  border: 1px solid #f5d2f2;
+  border-radius: 2rem;
+  overflow: hidden;
+}
+
+.envelope-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 5%, rgba(255, 255, 255, 0.9), transparent 22%);
+}
+
+.envelope-flap {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 150%;
+  height: 110%;
+  transform: translateX(-50%) rotate(45deg);
+  transform-origin: top center;
+  background: linear-gradient(180deg, #f9d5f8 0%, #f8b2ee 100%);
+  box-shadow: inset 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.envelope-paper {
+  position: absolute;
+  inset: 18% 10% 10%;
+  background: #fff;
+  border-radius: 1.5rem;
+  padding: 1.8rem 1.6rem;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  box-shadow: 0 14px 40px rgba(111, 66, 193, 0.12);
+}
+
+.cake-ring {
+  border-radius: 2.5rem;
+}
+
+.heart-floating {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+}
+
+.heart-floating span {
+  display: inline-block;
+  font-size: 1.3rem;
+}
+
+.flash-border {
+  border: 1px solid rgba(249, 168, 212, 0.65);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.glow-text {
+  text-shadow: 0 8px 24px rgba(236, 72, 153, 0.18);
+}
+
+.stiker-floating {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 20px 50px rgba(168, 85, 247, 0.15);
+  font-size: 1.6rem;
+  color: #7c3aed;
+  transform: translateY(0);
+}
+
+.stiker-a {
+  animation: float-1 4s ease-in-out infinite;
+}
+
+.stiker-b {
+  animation: float-2 3.6s ease-in-out infinite;
+}
+
+.stiker-c {
+  animation: float-3 4.2s ease-in-out infinite;
+}
+
+@keyframes float-1 {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-10px) translateX(-4px); }
+}
+
+@keyframes float-2 {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-8px) translateX(6px); }
+}
+
+@keyframes float-3 {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-12px) translateX(2px); }
+}
+
+.shadow-glow {
+  box-shadow: 0 28px 70px rgba(168, 85, 247, 0.12);
+}
+
+.kotak {
+  position: relative;
+}
+
+.decor {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 9999px;
+  background: rgba(236, 72, 153, 0.1);
+  filter: blur(18px);
+}
+
+.decor-tl {
+  top: -20px;
+  left: -20px;
+}
+
+.decor-br {
+  bottom: -20px;
+  right: -20px;
+}
+
+.stiker {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  border-radius: 1.5rem;
+  background: linear-gradient(135deg, rgba(251, 207, 232, 0.95), rgba(236, 72, 153, 0.2));
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  font-size: 1.95rem;
+  opacity: 0;
+  transform: translateY(10px) scale(0.9);
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.stiker-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.stiker-a {
+  animation: float-1 3.6s ease-in-out infinite;
+}
+
+.stiker-b {
+  animation: float-2 3.2s ease-in-out infinite;
+}
+
+.stiker-c {
+  animation: float-3 3.8s ease-in-out infinite;
+}
+
+@keyframes float-1 {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.02); }
+}
+
+@keyframes float-2 {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(8deg); }
+}
+
+@keyframes float-3 {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-12px) scale(0.98); }
+}
