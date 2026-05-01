@@ -245,8 +245,16 @@ function IntroScreen({ onStart, onResume, ready, savedStep }) {
               disabled={!ready}
               className={`rounded-full px-8 py-4 text-lg font-semibold text-white shadow-lg transition ${ready ? 'bg-pink-500 hover:bg-pink-600 shadow-pink-500/20' : 'cursor-not-allowed bg-slate-300 shadow-slate-200'}`}
             >
-              {ready ? 'Mulai Petualangan' : 'Menyiapkan data...' }
+              {ready ? 'Mulai Petualangan' : 'Menyiapkan data...'}
             </button>
+            {ready && savedStep !== null && savedStep > 0 && (
+              <button
+                onClick={onResume}
+                className="rounded-full border border-pink-500 bg-white px-8 py-4 text-lg font-semibold text-pink-600 shadow-sm transition hover:bg-pink-50"
+              >
+                Lanjutkan dari stage sebelumnya
+              </button>
+            )}
             {!ready && <p className="text-sm text-slate-500">Tunggu sebentar, data sudah dipersiapkan untukmu.</p>}
           </div>
         </div>

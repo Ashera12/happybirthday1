@@ -65,7 +65,8 @@ export default function Envelope({ onNext }) {
 
         <button
           onClick={handleOpen}
-          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-violet-500 px-8 py-3 text-white shadow-xl shadow-pink-400/20 transition hover:scale-[1.02]"
+          disabled={opened}
+          className={`inline-flex items-center justify-center rounded-full px-8 py-3 text-white shadow-xl shadow-pink-400/20 transition hover:scale-[1.02] ${opened ? 'cursor-not-allowed bg-slate-300' : 'bg-gradient-to-r from-pink-500 to-violet-500 hover:opacity-95'}`}
         >
           {opened ? 'Buka segera...' : 'Buka Amplop'}
         </button>
