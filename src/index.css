@@ -217,3 +217,93 @@ input::placeholder {
   0%, 100% { transform: translateY(0) scale(1); }
   50% { transform: translateY(-12px) scale(0.98); }
 }
+
+/* Cake and Candle Styles */
+.lilin-container {
+  position: relative;
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.lilin {
+  position: relative;
+  width: 8px;
+  height: 32px;
+  background: linear-gradient(180deg, #ffd700 0%, #ffa500 100%);
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
+}
+
+.api {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 14px;
+  background: linear-gradient(180deg, #ffff00 0%, #ff6b00 100%);
+  border-radius: 50% 50% 40% 40%;
+  box-shadow: 0 0 8px rgba(255, 165, 0, 0.8);
+  animation: flicker 0.4s ease-in-out infinite;
+}
+
+.api.mati {
+  animation: none;
+  opacity: 0;
+}
+
+@keyframes flicker {
+  0%, 100% { transform: translateX(-50%) scaleY(1); }
+  50% { transform: translateX(-50%) scaleY(0.95); }
+}
+
+.kue {
+  width: 120px;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.lapisan {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.lapisan-atas {
+  height: 12px;
+  margin-bottom: 2px;
+}
+
+.lapisan-atas .krim {
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, #ffb6d9 0%, #ff69b4 100%);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(255, 105, 180, 0.3);
+}
+
+.lapisan-tengah {
+  height: 14px;
+  margin-bottom: 2px;
+}
+
+.lapisan-tengah .coklat,
+.lapisan-bawah .coklat {
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, #8b6f47 0%, #654321 100%);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.lapisan-bawah {
+  height: 18px;
+}
