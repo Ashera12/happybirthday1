@@ -54,15 +54,15 @@ export default function Cake({ onDone }) {
         </div>
 
         {/* Cake Section */}
-        <div className="relative mx-auto flex h-96 w-96 items-center justify-center rounded-[2rem]">
+        <div className="relative mx-auto flex h-80 w-96 items-center justify-center rounded-[2rem] overflow-hidden">
           <motion.div
             animate={blown ? { y: -30, opacity: 0 } : { y: 0, opacity: 1 }}
             transition={{ duration: 0.85, ease: 'easeOut' }}
-            className="absolute top-16 z-20 flex h-28 w-28 items-center justify-center rounded-full bg-white/60 shadow-lg backdrop-blur-sm"
+            className="absolute top-12 z-20 flex h-28 w-28 items-center justify-center rounded-full bg-white/60 shadow-lg backdrop-blur-sm"
           >
             <span className="text-6xl">✨</span>
           </motion.div>
-          <div className="absolute bottom-12 z-30 flex h-48 w-56 flex-col items-center justify-end gap-3 rounded-[2.5rem] bg-white/90 p-6 shadow-2xl backdrop-blur-md border border-white/50">
+          <div className="absolute bottom-16 z-30 flex h-48 w-56 flex-col items-center justify-end gap-3 rounded-[2.5rem] bg-white/90 p-6 shadow-2xl backdrop-blur-md border border-white/50">
             {/* Lilin */}
             <div className="lilin-container">
               <div className="lilin">
@@ -93,7 +93,7 @@ export default function Cake({ onDone }) {
           </div>
         </div>
 
-        <p className="text-slate-600">{hint}</p>
+        <p className="text-slate-600 mt-6">{hint}</p>
         {blown && (
           <div className="mt-4 flex items-center justify-center gap-2">
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-pink-500 border-t-transparent"></div>
