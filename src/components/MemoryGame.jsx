@@ -24,11 +24,11 @@ const createSound = (src, volume = 0.7) => {
 const flipSound = createSound('https://assets.mixkit.co/sfx/preview/mixkit-arcade-retro-game-notification-218.wav', 0.45);
 const matchSound = createSound('https://assets.mixkit.co/sfx/preview/mixkit-video-game-positive-interface-239.wav', 0.7);
 
-const icons = ['🎁', '🎉', '💖', '🌸', '🥳', '💘'];
+const dates = [16, 27, 21, 94, 95];
 
 function buildCards() {
-  return [...icons, ...icons]
-    .map((icon, index) => ({ id: `${icon}-${index}`, icon, revealed: false, matched: false }))
+  return [...dates, ...dates]
+    .map((date, index) => ({ id: `${date}-${index}`, date, revealed: false, matched: false }))
     .sort(() => Math.random() - 0.5);
 }
 
@@ -44,13 +44,13 @@ export default function MemoryGame({ onComplete }) {
       const firstCard = cards[first];
       const secondCard = cards[second];
 
-      if (firstCard.icon === secondCard.icon) {
+      if (firstCard.date === secondCard.date) {
         setCards((current) =>
           current.map((card, index) =>
             index === first || index === second ? { ...card, matched: true } : card
           )
         );
-        setMessage('Pasangan cocok! Lanjut terus yaa ✨');
+        setMessage('Tanggal cocok! Terus semangat ✨');
         matchSound.play();
       } else {
         setCards((current) =>
@@ -58,7 +58,7 @@ export default function MemoryGame({ onComplete }) {
             index === first || index === second ? { ...card, revealed: false } : card
           )
         );
-        setMessage('Ups, belum tepat. Coba lagi dengan santai 🙂');
+        setMessage('Ups, tanggalnya beda. Coba lagi dengan santai 🙂');
       }
       setOpenedIndexes([]);
     }, 800);
@@ -80,7 +80,7 @@ export default function MemoryGame({ onComplete }) {
   const resetGame = () => {
     setCards(buildCards());
     setOpenedIndexes([]);
-    setMessage('Mulai ulang permainan dan temukan semua pasangan!');
+    setMessage('Mulai ulang dan cocokin semua tanggal yang sama!');
   };
 
   return (
@@ -88,24 +88,24 @@ export default function MemoryGame({ onComplete }) {
       <div className="grid gap-6 text-center">
         <div>
           <p className="text-sm uppercase tracking-[0.35em] text-pink-500">Mini Game</p>
-          <h2 className="text-3xl font-semibold text-slate-900">Memory Match</h2>
-          <p className="mt-2 text-slate-600">Balik kartu dan cari pasangan yang sama untuk membuka lanjutan cerita.</p>
+          <h2 className="text-3xl font-semibold text-slate-900">Susun Tanggal</h2>
+          <p className="mt-2 text-slate-600">Balik kartu dan cocokin tanggal-tanggal yang sama untuk membuka lanjutan cerita.</p>
         </div>
 
         <div className="grid gap-4 rounded-[2rem] border border-slate-200 bg-slate-50 p-4">
           <p className="text-slate-700">{message}</p>
-          <div className="grid grid-cols-3 gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-3 gap-4 sm:grid-cols-5">
             {cards.map((card, index) => (
               <motion.button
                 key={card.id}
                 type="button"
                 onClick={() => handleFlip(index)}
                 whileTap={{ scale: 0.98 }}
-                className={`aspect-square rounded-3xl border border-slate-200 bg-white text-3xl shadow-sm transition ${
-                  card.revealed || card.matched ? 'bg-violet-50 text-slate-900' : 'bg-slate-100 text-slate-100'
+                className={`aspect-square rounded-2xl border-2 text-lg font-semibold shadow-sm transition ${
+                  card.revealed || card.matched ? 'bg-violet-100 border-violet-300 text-slate-900' : 'bg-slate-300 border-slate-400 text-slate-300'
                 }`}
               >
-                {card.revealed || card.matched ? card.icon : '❓'}
+                {card.revealed || card.matched ? card.date : '?'}
               </motion.button>
             ))}
           </div>
