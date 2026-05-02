@@ -41,23 +41,28 @@ export default function Cake({ onDone }) {
     <section className="kotak mx-auto max-w-3xl rounded-[2rem] border border-white/80 bg-white/95 p-8 shadow-glow">
       <div className="decor decor-tl"></div>
       <div className="decor decor-br"></div>
-      <div className="grid gap-6 text-center">
+      <div className="grid gap-8 text-center">
         <div>
           <p className="text-sm uppercase tracking-[0.35em] text-pink-500">Moment Harapan</p>
           <h2 className="text-3xl font-semibold text-slate-900">Tiup Lilinnya</h2>
           <p className="mt-2 text-slate-600">Sebelum pesan akhir, tutup matamu dan buat satu permintaan manis.</p>
         </div>
 
-        <div className="relative mx-auto flex h-80 w-80 items-center justify-center rounded-[2rem] border border-pink-100 bg-pink-50/95 shadow-inner">
-          <img src="https://htmlku.com/0/panda/kue.gif" alt="" className="pointer-events-none absolute z-0 h-32 w-32 rounded-[2rem] object-cover opacity-30" />
+        {/* GIF Section */}
+        <div className="mx-auto">
+          <img src="https://htmlku.com/0/panda/kue.gif" alt="kue" className="h-24 w-24 rounded-[1rem] object-cover opacity-40" />
+        </div>
+
+        {/* Cake Section */}
+        <div className="relative mx-auto flex h-64 w-64 items-center justify-center rounded-[2rem] border border-pink-100 bg-pink-50/95 shadow-inner">
           <motion.div
             animate={blown ? { y: -20, opacity: 0 } : { y: 0, opacity: 1 }}
             transition={{ duration: 0.85, ease: 'easeOut' }}
-            className="absolute top-12 z-20 flex h-24 w-24 items-center justify-center rounded-full bg-white/80 shadow-lg"
+            className="absolute top-8 z-20 flex h-20 w-20 items-center justify-center rounded-full bg-white/80 shadow-lg"
           >
-            <span className="text-5xl">✨</span>
+            <span className="text-4xl">✨</span>
           </motion.div>
-          <div className="absolute bottom-12 z-30 flex h-40 w-48 flex-col items-center justify-end gap-2 rounded-[3rem] bg-white p-4 shadow-xl">
+          <div className="absolute bottom-8 z-30 flex h-32 w-40 flex-col items-center justify-end gap-1 rounded-[2rem] bg-white p-3 shadow-lg">
             {/* Lilin */}
             <div className="lilin-container">
               <div className="lilin">
@@ -65,7 +70,7 @@ export default function Cake({ onDone }) {
               </div>
             </div>
             {/* Kue dengan lapisan */}
-            <div className="kue">
+            <div className="kue" style={{ transform: 'scale(0.85)' }}>
               <div className="lapisan lapisan-atas">
                 <div className="krim"></div>
                 <div className="krim"></div>
