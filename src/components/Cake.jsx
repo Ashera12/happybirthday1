@@ -54,15 +54,15 @@ export default function Cake({ onDone }) {
         </div>
 
         {/* Cake Section */}
-        <div className="relative mx-auto flex h-64 w-64 items-center justify-center rounded-[2rem] border border-pink-100 bg-pink-50/95 shadow-inner">
+        <div className="relative mx-auto flex h-96 w-96 items-center justify-center rounded-[2rem]">
           <motion.div
-            animate={blown ? { y: -20, opacity: 0 } : { y: 0, opacity: 1 }}
+            animate={blown ? { y: -30, opacity: 0 } : { y: 0, opacity: 1 }}
             transition={{ duration: 0.85, ease: 'easeOut' }}
-            className="absolute top-8 z-20 flex h-20 w-20 items-center justify-center rounded-full bg-white/80 shadow-lg"
+            className="absolute top-16 z-20 flex h-28 w-28 items-center justify-center rounded-full bg-white/60 shadow-lg backdrop-blur-sm"
           >
-            <span className="text-4xl">✨</span>
+            <span className="text-6xl">✨</span>
           </motion.div>
-          <div className="absolute bottom-8 z-30 flex h-32 w-40 flex-col items-center justify-end gap-1 rounded-[2rem] bg-white p-3 shadow-lg">
+          <div className="absolute bottom-12 z-30 flex h-48 w-56 flex-col items-center justify-end gap-3 rounded-[2.5rem] bg-white/90 p-6 shadow-2xl backdrop-blur-md border border-white/50">
             {/* Lilin */}
             <div className="lilin-container">
               <div className="lilin">
@@ -70,7 +70,7 @@ export default function Cake({ onDone }) {
               </div>
             </div>
             {/* Kue dengan lapisan */}
-            <div className="kue" style={{ transform: 'scale(0.85)' }}>
+            <div className="kue">
               <div className="lapisan lapisan-atas">
                 <div className="krim"></div>
                 <div className="krim"></div>
