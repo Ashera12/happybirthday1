@@ -48,13 +48,8 @@ export default function Cake({ onDone }) {
           <p className="mt-2 text-slate-600">Sebelum pesan akhir, tutup matamu dan buat satu permintaan manis.</p>
         </div>
 
-        {/* GIF Section */}
-        <div className="mx-auto">
-          <img src="https://htmlku.com/0/panda/kue.gif" alt="kue" className="h-24 w-24 rounded-[1rem] object-cover opacity-40" />
-        </div>
-
         {/* Cake Section */}
-        <div className="relative mx-auto flex h-80 w-96 items-center justify-center rounded-[2rem] overflow-hidden">
+        <div className="relative mx-auto flex h-64 w-96 items-center justify-center rounded-[2rem] overflow-hidden">
           <motion.div
             className="relative z-20 flex flex-col items-center justify-center gap-4 rounded-[2.5rem] bg-white/95 p-6 shadow-2xl backdrop-blur-md border border-white/60"
             initial={{ y: 24, opacity: 0 }}
