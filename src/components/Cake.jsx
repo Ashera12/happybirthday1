@@ -56,41 +56,23 @@ export default function Cake({ onDone }) {
         {/* Cake Section */}
         <div className="relative mx-auto flex h-80 w-96 items-center justify-center rounded-[2rem] overflow-hidden">
           <motion.div
-            animate={blown ? { y: -30, opacity: 0 } : { y: 0, opacity: 1 }}
-            transition={{ duration: 0.85, ease: 'easeOut' }}
-            className="absolute top-12 z-20 flex h-28 w-28 items-center justify-center rounded-full bg-white/60 shadow-lg backdrop-blur-sm"
+            className="relative z-20 flex flex-col items-center justify-center gap-4 rounded-[2.5rem] bg-white/95 p-6 shadow-2xl backdrop-blur-md border border-white/60"
+            initial={{ y: 24, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
           >
-            <span className="text-6xl">✨</span>
+            <motion.div
+              className="cake-gif-container"
+              animate={blown ? { scale: 1.05, y: -10 } : { scale: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            >
+              <img
+                src="https://htmlku.com/0/panda/kue.gif"
+                alt="Cake with blowing candle"
+                className="cake-gif"
+              />
+            </motion.div>
           </motion.div>
-          <div className="absolute bottom-16 z-30 flex h-48 w-56 flex-col items-center justify-end gap-3 rounded-[2.5rem] bg-white/90 p-6 shadow-2xl backdrop-blur-md border border-white/50">
-            {/* Lilin */}
-            <div className="lilin-container">
-              <div className="lilin">
-                <div className={`api ${blown ? 'mati' : ''}`} id="apiLilin"></div>
-              </div>
-            </div>
-            {/* Kue dengan lapisan */}
-            <div className="kue">
-              <div className="lapisan lapisan-atas">
-                <div className="krim"></div>
-                <div className="krim"></div>
-                <div className="krim"></div>
-              </div>
-              <div className="lapisan lapisan-tengah">
-                <div className="coklat"></div>
-                <div className="coklat"></div>
-                <div className="coklat"></div>
-                <div className="coklat"></div>
-              </div>
-              <div className="lapisan lapisan-bawah">
-                <div className="coklat"></div>
-                <div className="coklat"></div>
-                <div className="coklat"></div>
-                <div className="coklat"></div>
-                <div className="coklat"></div>
-              </div>
-            </div>
-          </div>
         </div>
 
         <p className="text-slate-600 mt-6">{hint}</p>
