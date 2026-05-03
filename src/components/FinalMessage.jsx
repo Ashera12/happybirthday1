@@ -5,6 +5,8 @@ import {
 
 import { motion } from 'framer-motion';
 
+import { supabase } from '../lib/supabaseClient';
+
 const finalText = [
   'Happy Birthday 🎉',
   'Semoga setiap hari baru membawamu lebih dekat ke semua impianmu.',
@@ -16,6 +18,14 @@ export default function FinalMessage({ onReset }) {
   const [index, setIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
   const [showStickers, setShowStickers] = useState(false);
+  const [recipient, setRecipient] = useState('');
+  const [sender, setSender] = useState('');
+  const [customMessage, setCustomMessage] = useState(finalText.join('\n\n'));
+  const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [shareUrl, setShareUrl] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     if (index >= finalText.length) return;
@@ -40,6 +50,90 @@ export default function FinalMessage({ onReset }) {
     const timer = window.setTimeout(() => setShowStickers(true), 900);
     return () => window.clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl('');
+      return undefined;
+    }
+
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  const handleFileChange = (event) => {
+    const selected = event.target.files?.[0];
+    if (selected) {
+      setFile(selected);
+    } else {
+      setFile(null);
+    }
+  };
+
+  const handleCreateShare = async () => {
+    setSaving(true);
+    setSaveError('');
+    setShareUrl('');
+
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      setSaveError('Supabase belum dikonfigurasi.');
+      setSaving(false);
+      return;
+    }
+
+    try {
+      const id = (crypto.randomUUID && crypto.randomUUID()) || `card-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      let imageUrl = null;
+
+      if (file) {
+        const ext = file.name.split('.').pop();
+        const filename = `${id}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from('birthday-cards')
+          .upload(filename, file, { cacheControl: '3600', upsert: true });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data } = supabase.storage.from('birthday-cards').getPublicUrl(filename);
+        imageUrl = data.publicUrl;
+      }
+
+      const { error: insertError } = await supabase.from('birthday_cards').insert([
+        {
+          id,
+          recipient,
+          sender,
+          message: customMessage,
+          image_url: imageUrl,
+        },
+      ]);
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      const url = `${window.location.origin}/share/${id}`;
+      setShareUrl(url);
+    } catch (err) {
+      setSaveError(err?.message || 'Gagal membuat link share.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+    } catch {
+      setSaveError('Gagal menyalin link, silakan coba manual.');
+    }
+  };
+
+  const currentShareUrl = shareUrl || window.location.href;
 
   return (
     <section className="kotak mx-auto max-w-3xl rounded-[2rem] border border-white/80 bg-white/95 p-8 shadow-glow">
@@ -71,24 +165,94 @@ export default function FinalMessage({ onReset }) {
             </motion.p>
           </div>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <div className="mt-8 rounded-[2rem] border border-slate-200 bg-slate-50 p-6 shadow-sm">
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <label className="text-sm font-semibold text-slate-700">Nama yang ulang tahun</label>
+                <input
+                  value={recipient}
+                  onChange={(event) => setRecipient(event.target.value)}
+                  placeholder="Misal: Adek, Sahabat, atau Nama"
+                  className="rounded-3xl border border-slate-200 bg-white px-4 py-3 text-slate-700 outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                />
+              </div>
+              <div className="grid gap-2">
+                <label className="text-sm font-semibold text-slate-700">Namamu</label>
+                <input
+                  value={sender}
+                  onChange={(event) => setSender(event.target.value)}
+                  placeholder="Misal: Dari aku"
+                  className="rounded-3xl border border-slate-200 bg-white px-4 py-3 text-slate-700 outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                />
+              </div>
+              <div className="grid gap-2">
+                <label className="text-sm font-semibold text-slate-700">Pesan spesial</label>
+                <textarea
+                  value={customMessage}
+                  onChange={(event) => setCustomMessage(event.target.value)}
+                  rows={4}
+                  className="rounded-[1.5rem] border border-slate-200 bg-white px-4 py-3 text-slate-700 outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+                />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+                <label className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white px-4 py-5 text-center text-slate-500 transition hover:border-pink-300 hover:bg-pink-50">
+                  <span className="block text-sm">Upload foto untuk kartu</span>
+                  <span className="mt-3 block text-2xl">📷</span>
+                  <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                </label>
+                {previewUrl ? (
+                  <img src={previewUrl} alt="Preview foto" className="h-28 w-28 rounded-[1.5rem] object-cover shadow-sm" />
+                ) : (
+                  <div className="flex h-28 items-center justify-center rounded-[1.5rem] border border-slate-200 bg-slate-100 text-sm text-slate-500">
+                    Belum ada foto dipilih
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <button
-              onClick={() => window.navigator.share?.({
-                title: 'Kado Spesial Untukmu',
-                text: 'Lihat pesan spesial ini!',
-                url: window.location.href,
-              })}
-              className="rounded-full bg-pink-500 px-5 py-3 text-white shadow-lg shadow-pink-500/20 transition hover:bg-pink-600"
+              onClick={handleCreateShare}
+              disabled={saving}
+              className="rounded-full bg-pink-500 px-5 py-4 text-white shadow-lg shadow-pink-500/20 transition hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Share
+              {saving ? 'Membuat link...' : 'Buat Link Share'}
             </button>
             <button
               onClick={onReset}
-              className="rounded-full border border-slate-200 bg-white px-5 py-3 text-slate-800 shadow-sm transition hover:border-pink-300 hover:text-pink-600"
+              className="rounded-full border border-slate-200 bg-white px-5 py-4 text-slate-800 shadow-sm transition hover:border-pink-300 hover:text-pink-600"
             >
               Mulai Lagi
             </button>
           </div>
+
+          {saveError && <p className="mt-4 text-sm text-red-500">{saveError}</p>}
+
+          {shareUrl && (
+            <div className="mt-6 rounded-[1.5rem] border border-pink-100 bg-white p-4 shadow-sm">
+              <p className="text-sm text-slate-500">Link share berhasil dibuat:</p>
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                <input
+                  readOnly
+                  value={shareUrl}
+                  className="flex-1 rounded-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none"
+                />
+                <button
+                  onClick={handleCopyLink}
+                  className="rounded-full bg-violet-500 px-5 py-3 text-white shadow-lg shadow-violet-500/20 transition hover:bg-violet-600"
+                >
+                  Salin Link
+                </button>
+              </div>
+              <button
+                onClick={() => navigator.share?.({ title: `Kartu untuk ${recipient || 'Teman'}`, text: customMessage.slice(0, 100), url: shareUrl })}
+                className="mt-4 w-full rounded-full bg-pink-500 px-5 py-3 text-white shadow-lg shadow-pink-500/20 transition hover:bg-pink-600"
+              >
+                Share Langsung
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </section>

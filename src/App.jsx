@@ -16,6 +16,7 @@ import Envelope from './components/Envelope';
 import FinalMessage from './components/FinalMessage';
 import MemoryGame from './components/MemoryGame';
 import RiddleGate from './components/RiddleGate';
+import ShareView from './components/ShareView';
 
 const steps = [
   'Teka-teki',
@@ -32,6 +33,14 @@ export default function App() {
   const [isReady, setIsReady] = useState(false);
 
   const [savedStep, setSavedStep] = useState(null);
+  const [shareId, setShareId] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    const pathname = window.location.pathname;
+    const pathMatch = pathname.match(/^\/share\/([A-Za-z0-9_-]+)/);
+    if (pathMatch) return pathMatch[1];
+    const query = new URLSearchParams(window.location.search);
+    return query.get('share');
+  });
 
   useEffect(() => {
     const saved = localStorage.getItem('kado-final-progress');
@@ -130,6 +139,15 @@ export default function App() {
       return <PageLoading />;
     }
 
+    if (shareId) {
+      return <ShareView shareId={shareId} onClose={() => {
+        window.history.replaceState({}, '', '/');
+        setShareId(null);
+        setStep(0);
+        setHasStarted(false);
+      }} />;
+    }
+
     if (!hasStarted) {
       return (
         <IntroScreen
@@ -155,10 +173,10 @@ export default function App() {
       default:
         return <RiddleGate onSuccess={goNext} />;
     }
-  }, [hasLoaded, hasStarted, isReady, step, handleStart, goNext, resetProgress]);
+  }, [hasLoaded, hasStarted, isReady, step, shareId, handleStart, goNext, resetProgress]);
 
-  const showCakeEffect = hasStarted && step === 3;
-  const showFloatingStickers = !hasStarted || step === 4;
+  const showCakeEffect = !shareId && hasStarted && step === 3;
+  const showFloatingStickers = !shareId && (!hasStarted || step === 4);
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(236,72,153,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(138,92,246,0.2),_transparent_28%)] text-slate-900">
