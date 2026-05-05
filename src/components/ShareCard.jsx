@@ -358,7 +358,7 @@ export default function ShareCard({ username, onClose }) {
           </div>
         </div>
       </div>
-      
+
       {/* Loading Overlay */}
       {saving && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
