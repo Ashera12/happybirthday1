@@ -273,13 +273,13 @@ export default function ShareCard({ username, onClose }) {
               <div
                 className="absolute"
                 style={{
-                  left: `${card.image_position?.x || 50}%`,
-                  top: `${card.image_position?.y || 20}%`,
-                  transform: `translate(-50%, -50%) scale(${card.image_scale || 1})`
+                  left: `${card?.image_position?.x || 50}%`,
+                  top: `${card?.image_position?.y || 20}%`,
+                  transform: `translate(-50%, -50%) scale(${card?.image_scale || 1})`
                 }}
               >
                 <img 
-                  src={card.image_url} 
+                  src={card?.image_url} 
                   alt="Card image" 
                   className="w-32 h-32 object-cover rounded-lg shadow-lg"
                 />
@@ -290,12 +290,12 @@ export default function ShareCard({ username, onClose }) {
             <div
               className="absolute max-w-[80%] text-center"
               style={{
-                left: `${card.text_position?.x || 50}%`,
-                top: `${card.text_position?.y || 70}%`,
+                left: `${card?.text_position?.x || 50}%`,
+                top: `${card?.text_position?.y || 70}%`,
                 transform: 'translate(-50%, -50%)'
               }}
             >
-              <p className={`${card.text_size || 'text-lg'} font-bold whitespace-pre-line ${getThemeTextClass(card?.theme_color)}`}>
+              <p className={`${card?.text_size || 'text-lg'} font-bold whitespace-pre-line ${getThemeTextClass(card?.theme_color)}`}>
                 {card?.message || 'Tulis pesanmu di sini...'}
               </p>
               <p className={`text-sm mt-2 ${getThemeTextClass(card?.theme_color)}`}>
