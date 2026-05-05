@@ -80,14 +80,14 @@ export default function ShareCard({ username, onClose }) {
     setSaving(true);
     
     try {
-      console.log('Saving card for:', username);
+      console.log('💾 Saving card for username:', username);
       
-      // Prepare card data
+      // Prepare card data with all required fields
       const cardToSave = {
-        username,
-        recipient: cardData.recipient || '',
-        sender: cardData.sender || '',
-        message: cardData.message || '',
+        username: username,
+        recipient: cardData.recipient || 'Teman',
+        sender: cardData.sender || 'Sahabat',
+        message: cardData.message || '🎉 Happy Birthday!',
         image_url: cardData.imageUrl || '',
         image_position: cardData.imagePosition || { x: 50, y: 20 },
         text_position: cardData.textPosition || { x: 50, y: 70 },
@@ -97,18 +97,21 @@ export default function ShareCard({ username, onClose }) {
         updated_at: new Date().toISOString()
       };
 
-      let savedCard = null;
-      let useSupabase = false;
+      console.log('📝 Card data prepared:', cardToSave);
 
-      // Try Supabase first if available
+      // ALWAYS save to localStorage first (guaranteed)
+      localStorage.setItem(`birthday-card-${username}`, JSON.stringify(cardToSave));
+      console.log('✅ Saved to localStorage (guaranteed)');
+
+      // Try Supabase if available (optional enhancement)
       if (supabase) {
         try {
-          console.log('Saving to Supabase...');
+          console.log('🔄 Trying Supabase save...');
           
           // Handle image upload if needed
           let imageUrl = cardData.imageUrl;
           if (cardData.imageUrl && cardData.imageUrl.startsWith('data:')) {
-            // Convert data URL to blob and upload
+            console.log('📤 Uploading image to Supabase Storage...');
             const base64Data = cardData.imageUrl.split(',')[1];
             const byteCharacters = atob(base64Data);
             const byteNumbers = new Array(byteCharacters.length);
@@ -124,12 +127,14 @@ export default function ShareCard({ username, onClose }) {
               .upload(filename, blob, { cacheControl: '3600', upsert: true });
 
             if (uploadError) {
+              console.log('⚠️ Image upload failed:', uploadError);
               throw uploadError;
             }
 
             const { data } = supabase.storage.from('birthday-cards').getPublicUrl(filename);
             imageUrl = data.publicUrl;
             cardToSave.image_url = imageUrl;
+            console.log('✅ Image uploaded to Supabase:', imageUrl);
           }
 
           // Save to database
@@ -137,35 +142,32 @@ export default function ShareCard({ username, onClose }) {
             ? await supabase.from('birthday_cards').update(cardToSave).eq('username', username).select()
             : await supabase.from('birthday_cards').insert([cardToSave]).select();
 
-          if (error) throw error;
+          if (error) {
+            console.log('❌ Supabase database error:', error);
+            throw error;
+          }
           
-          savedCard = data[0];
-          useSupabase = true;
-          console.log('Saved to Supabase:', savedCard);
+          console.log('✅ Saved to Supabase database:', data[0]);
+          
+          // Update local storage with Supabase data
+          localStorage.setItem(`birthday-card-${username}`, JSON.stringify(data[0]));
           
         } catch (supabaseError) {
-          console.log('Supabase save failed, using localStorage:', supabaseError);
-          useSupabase = false;
+          console.log('⚠️ Supabase save failed, using localStorage only:', supabaseError);
+          // Continue with localStorage only - app still works perfectly
         }
       }
 
-      // Always save to localStorage as backup
-      localStorage.setItem(`birthday-card-${username}`, JSON.stringify(cardToSave));
-      
-      // Use Supabase data if available, otherwise use local data
-      const finalCard = savedCard || cardToSave;
-      
-      // Update state
-      setCard(finalCard);
+      // Update state with saved data
+      setCard(cardToSave);
       setShowEditor(false);
       setShareUrl(`${window.location.origin}/${username}`);
       
       // Show success message
-      const storageType = useSupabase ? 'Supabase' : 'localStorage';
-      alert(`🎉 Kartu berhasil disimpan ke ${storageType}!`);
+      alert('🎉 Kartu berhasil dibuat dan disimpan!');
       
     } catch (err) {
-      console.error('Save card error:', err);
+      console.error('💥 Save card error:', err);
       setError('Gagal menyimpan kartu. Silakan coba lagi.');
     } finally {
       setSaving(false);
