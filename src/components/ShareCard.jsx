@@ -3,6 +3,25 @@ import { motion } from 'framer-motion';
 import CardEditorEnhanced from './CardEditorEnhanced';
 import { supabase } from '../lib/supabaseClient';
 
+// Helper function to get theme text class
+const getThemeTextClass = (themeColor) => {
+  const themeClasses = {
+    pink: 'text-pink-600',
+    violet: 'text-violet-600',
+    blue: 'text-blue-600',
+    green: 'text-green-600',
+    yellow: 'text-yellow-600',
+    red: 'text-red-600'
+  };
+  return themeClasses[themeColor] || 'text-pink-600';
+};
+
+// Helper function to parse stickers from string
+const parseStickers = (stickersString) => {
+  if (!stickersString) return ['🎉', '🎂', '🎁'];
+  return stickersString.split(',').filter(s => s.trim());
+};
+
 export default function ShareCard({ username, onClose }) {
   const [card, setCard] = useState(null);
   const [loading, setLoading] = useState(true);
