@@ -6,13 +6,19 @@ import ViewCard from './components/ViewCard';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState('/');
-  const [draftUsername, setDraftUsername] = useState('');
+  const [draftUsername, setDraftUsername] = useState(() => {
+    // Try to get from localStorage on init
+    return localStorage.getItem('draft-username') || '';
+  });
 
   useEffect(() => {
-    setCurrentPath(window.location.pathname);
+    const path = window.location.pathname;
+    console.log('Current path:', path);
+    setCurrentPath(path);
     
     // Listen for popstate (back/forward buttons)
     const handlePopState = () => {
+      console.log('Popstate, new path:', window.location.pathname);
       setCurrentPath(window.location.pathname);
     };
     window.addEventListener('popstate', handlePopState);
@@ -20,8 +26,10 @@ export default function App() {
   }, []);
 
   const navigate = (path) => {
+    console.log('Navigating to:', path);
     window.history.pushState({}, '', path);
     setCurrentPath(path);
+    console.log('Navigation complete, current pathname:', window.location.pathname);
   };
 
   // Parse path
@@ -36,6 +44,8 @@ export default function App() {
 
   // Handle username submission from root page
   const handleUsernameSubmit = (username) => {
+    console.log('Submitting username:', username);
+    localStorage.setItem('draft-username', username);
     setDraftUsername(username);
     navigate('/edit');
   };
