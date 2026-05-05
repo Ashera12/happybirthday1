@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { supabase } from '../lib/supabaseClient';
 import CardEditor from './CardEditor';
 
 export default function ShareCard({ username, onClose }) {
@@ -12,52 +11,29 @@ export default function ShareCard({ username, onClose }) {
   const [shareUrl, setShareUrl] = useState('');
 
   useEffect(() => {
-    const fetchCard = async () => {
+    const fetchCard = () => {
       setLoading(true);
       setError('');
       
-      // For demo purposes, work without Supabase
-      if (!supabase) {
-        console.log('Supabase not configured - working in demo mode');
-        // Try to load from localStorage
-        try {
-          const savedCard = localStorage.getItem(`birthday-card-${username}`);
-          if (savedCard) {
-            setCard(JSON.parse(savedCard));
-          } else {
-            setCard(null); // No existing card
-          }
-        } catch (err) {
-          console.log('No saved card found in localStorage');
-          setCard(null);
-        }
-        setLoading(false);
-        return;
-      }
-
+      // ALWAYS use localStorage - no database dependencies
+      console.log('Loading card from localStorage for:', username);
+      
       try {
-        const { data, error: fetchError } = await supabase
-          .from('birthday_cards')
-          .select('*')
-          .eq('username', username)
-          .single();
-
-        if (fetchError && fetchError.code !== 'PGRST116') {
-          throw fetchError;
-        }
-
-        setCard(data);
-      } catch (err) {
-        console.error('Share card fetch error:', err);
-        // Don't set error for missing cards - that's expected for new cards
-        if (err?.code !== 'PGRST116') {
-          setError(err?.message || 'Terjadi kesalahan saat memuat data.');
+        const savedCard = localStorage.getItem(`birthday-card-${username}`);
+        if (savedCard) {
+          const parsedCard = JSON.parse(savedCard);
+          console.log('Found saved card:', parsedCard);
+          setCard(parsedCard);
         } else {
-          setCard(null); // Card doesn't exist yet
+          console.log('No saved card found for:', username);
+          setCard(null); // No existing card
         }
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.log('Error loading from localStorage:', err);
+        setCard(null);
       }
+      
+      setLoading(false);
     };
 
     if (username) {
@@ -72,111 +48,38 @@ export default function ShareCard({ username, onClose }) {
   const handleSaveCard = async (cardData) => {
     setSaving(true);
     
-    // Demo mode - save to localStorage
-    if (!supabase) {
-      try {
-        // Save image as data URL (already is)
-        const cardToSave = {
-          username,
-          recipient: cardData.recipient,
-          sender: cardData.sender,
-          message: cardData.message,
-          image_url: cardData.imageUrl,
-          image_position: cardData.imagePosition,
-          text_position: cardData.textPosition,
-          image_scale: cardData.imageScale,
-          text_size: cardData.textSize,
-          updated_at: new Date().toISOString()
-        };
-
-        // Save to localStorage for demo
-        localStorage.setItem(`birthday-card-${username}`, JSON.stringify(cardToSave));
-        
-        setCard(cardToSave);
-        setShowEditor(false);
-        setShareUrl(`${window.location.origin}/${username}`);
-        
-        // Show success message
-        alert('Kartu berhasil disimpan (demo mode)!');
-      } catch (err) {
-        console.error('Demo save error:', err);
-        setError('Gagal menyimpan kartu di demo mode.');
-      } finally {
-        setSaving(false);
-      }
-      return;
-    }
-
-    // Production mode with Supabase
     try {
-      let imageUrl = null;
-
-      // Upload image if it's a data URL
-      if (cardData.imageUrl && cardData.imageUrl.startsWith('data:')) {
-        const base64Data = cardData.imageUrl.split(',')[1];
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'image/jpeg' });
-
-        const filename = `${username}-${Date.now()}.jpg`;
-        const { error: uploadError } = await supabase.storage
-          .from('birthday-cards')
-          .upload(filename, blob, { cacheControl: '3600', upsert: true });
-
-        if (uploadError) {
-          throw uploadError;
-        }
-
-        const { data } = supabase.storage.from('birthday-cards').getPublicUrl(filename);
-        imageUrl = data.publicUrl;
-      } else {
-        imageUrl = cardData.imageUrl;
-      }
-
+      console.log('Saving card to localStorage for:', username);
+      
+      // Prepare card data
       const cardToSave = {
         username,
-        recipient: cardData.recipient,
-        sender: cardData.sender,
-        message: cardData.message,
-        image_url: imageUrl,
-        image_position: cardData.imagePosition,
-        text_position: cardData.textPosition,
-        image_scale: cardData.imageScale,
-        text_size: cardData.textSize,
+        recipient: cardData.recipient || '',
+        sender: cardData.sender || '',
+        message: cardData.message || '',
+        image_url: cardData.imageUrl || '',
+        image_position: cardData.imagePosition || { x: 50, y: 20 },
+        text_position: cardData.textPosition || { x: 50, y: 70 },
+        image_scale: cardData.imageScale || 1.0,
+        text_size: cardData.textSize || 'text-lg',
         updated_at: new Date().toISOString()
       };
 
-      let result;
-      if (card) {
-        // Update existing card
-        const { error: updateError } = await supabase
-          .from('birthday_cards')
-          .update(cardToSave)
-          .eq('username', username);
-
-        if (updateError) throw updateError;
-        result = { ...card, ...cardToSave };
-      } else {
-        // Create new card
-        const { data: insertData, error: insertError } = await supabase
-          .from('birthday_cards')
-          .insert([cardToSave])
-          .select();
-
-        if (insertError) throw insertError;
-        result = insertData[0];
-      }
-
-      setCard(result);
+      // Save to localStorage
+      localStorage.setItem(`birthday-card-${username}`, JSON.stringify(cardToSave));
+      console.log('Card saved successfully:', cardToSave);
+      
+      // Update state
+      setCard(cardToSave);
       setShowEditor(false);
       setShareUrl(`${window.location.origin}/${username}`);
+      
+      // Show success message
+      alert('🎉 Kartu berhasil dibuat dan disimpan!');
+      
     } catch (err) {
       console.error('Save card error:', err);
-      setError(err?.message || 'Gagal menyimpan kartu. Pastikan koneksi internet stabil.');
+      setError('Gagal menyimpan kartu. Silakan coba lagi.');
     } finally {
       setSaving(false);
     }
@@ -204,42 +107,7 @@ export default function ShareCard({ username, onClose }) {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-violet-50">
-        <div className="text-center max-w-md mx-auto p-6">
-          <div className="mb-6">
-            <div className="mx-auto w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center">
-              <span className="text-3xl">🎁</span>
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Kartu untuk @{username}
-          </h2>
-          <p className="text-gray-600 mb-6">
-            {error.includes('tidak ditemukan') 
-              ? `Belum ada kartu ucapan untuk @${username}. Buat kartu pertama sekarang!`
-              : error
-            }
-          </p>
-          <div className="space-y-3">
-            <button
-              onClick={handleCreateCard}
-              className="w-full bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600 transition"
-            >
-              {card ? 'Edit Kartu' : 'Buat Kartu Baru'}
-            </button>
-            <button
-              onClick={onClose}
-              className="w-full border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-50 transition"
-            >
-              Kembali
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Remove error state blocking - always show the card interface
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-violet-50">
@@ -312,7 +180,7 @@ export default function ShareCard({ username, onClose }) {
                 onClick={handleCreateCard}
                 className="bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600 transition"
               >
-                Edit Kartu
+                {card ? 'Edit Kartu' : 'Buat Kartu Baru'}
               </button>
               <button
                 onClick={handleCopyLink}
