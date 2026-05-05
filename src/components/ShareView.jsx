@@ -9,6 +9,12 @@ export default function ShareView({ shareId, onClose }) {
 
   useEffect(() => {
     const fetchCard = async () => {
+      if (!supabase) {
+        setError('Supabase belum dikonfigurasi. Fitur share tidak tersedia.');
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError('');
       try {
@@ -24,7 +30,8 @@ export default function ShareView({ shareId, onClose }) {
 
         setCard(data);
       } catch (err) {
-        setError(err?.message || 'Data tidak ditemukan.');
+        console.error('Share view fetch error:', err);
+        setError(err?.message || 'Data tidak ditemukan atau link tidak valid.');
       } finally {
         setLoading(false);
       }

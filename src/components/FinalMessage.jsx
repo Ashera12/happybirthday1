@@ -77,8 +77,8 @@ export default function FinalMessage({ onReset }) {
     setSaveError('');
     setShareUrl('');
 
-    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      setSaveError('Supabase belum dikonfigurasi.');
+    if (!supabase) {
+      setSaveError('Supabase belum dikonfigurasi. Fitur share tidak tersedia.');
       setSaving(false);
       return;
     }
@@ -119,7 +119,8 @@ export default function FinalMessage({ onReset }) {
       const url = `${window.location.origin}/share/${id}`;
       setShareUrl(url);
     } catch (err) {
-      setSaveError(err?.message || 'Gagal membuat link share.');
+      console.error('Share creation error:', err);
+      setSaveError(err?.message || 'Gagal membuat link share. Pastikan koneksi internet stabil.');
     } finally {
       setSaving(false);
     }
@@ -157,7 +158,15 @@ export default function FinalMessage({ onReset }) {
             <div className={`stiker stiker-c ${showStickers ? 'stiker-visible' : ''}`}>🌸</div>
           </div>
 
-          <img src="https://htmlku.com/0/panda/terlope.gif" alt="" className="mx-auto mb-6 h-40 w-40" />
+          <img 
+            src="https://htmlku.com/0/panda/terlope.gif" 
+            alt="" 
+            className="mx-auto mb-6 h-40 w-40"
+            onError={(e) => {
+              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwIiBoZWlnaHQ9IjE2MCIgdmlld0JveD0iMCAwIDE2MCAxNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNjAiIGhlaWdodD0iMTYwIiByeD0iMjAiIGZpbGw9IiNGRkVGRkYiLz4KPHRleHQgeD0iODAiIHk9Ijg1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiPkVudmVsb3BlPC90ZXh0Pgo8L3N2Zz4=';
+              console.log('Envelope image failed to load, using fallback');
+            }}
+          />
 
           <div className="space-y-5 text-center text-lg text-slate-700">
             <motion.p animate={{ y: [0, -4, 0] }} transition={{ duration: 2, repeat: Infinity }} className="text-3xl font-semibold text-slate-900">

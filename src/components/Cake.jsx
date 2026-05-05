@@ -5,13 +5,30 @@ import { Howl } from 'howler';
 
 const createSound = (src, volume = 0.7) => {
   try {
-    return new Howl({ src: [src], volume });
+    return new Howl({ 
+      src: [src], 
+      volume,
+      html5: true,
+      onloaderror: function() {
+        console.log(`Howl load error for: ${src}`);
+      },
+      onplayerror: function() {
+        console.log(`Howl play error for: ${src}`);
+      }
+    });
   } catch (e) {
+    console.log(`Failed to create Howl for ${src}:`, e);
     return {
       play: () => {
-        const audio = new Audio(src);
-        audio.volume = volume;
-        audio.play().catch(() => {});
+        try {
+          const audio = new Audio(src);
+          audio.volume = volume;
+          audio.play().catch((error) => {
+            console.log(`Audio fallback failed for ${src}:`, error);
+          });
+        } catch (fallbackError) {
+          console.log(`Audio fallback creation failed for ${src}:`, fallbackError);
+        }
       },
     };
   }
@@ -65,6 +82,10 @@ export default function Cake({ onDone }) {
                 src="https://htmlku.com/0/panda/kue.gif"
                 alt="Cake with blowing candle"
                 className="cake-gif"
+                onError={(e) => {
+                  e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiByeD0iMTYiIGZpbGw9IiNGM0Y0RjYiLz4KPHRleHQgeD0iMTAwIiB5PSI2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjNjY2Ij5DYWtlIEltYWdlPC90ZXh0Pgo8L3N2Zz4=';
+                  console.log('Cake image failed to load, using fallback');
+                }}
               />
             </motion.div>
           </motion.div>

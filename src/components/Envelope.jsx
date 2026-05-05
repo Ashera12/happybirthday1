@@ -8,13 +8,30 @@ import { Howl } from 'howler';
 
 const createSound = (src, volume = 0.8) => {
   try {
-    return new Howl({ src: [src], volume });
+    return new Howl({ 
+      src: [src], 
+      volume,
+      html5: true,
+      onloaderror: function() {
+        console.log(`Howl load error for: ${src}`);
+      },
+      onplayerror: function() {
+        console.log(`Howl play error for: ${src}`);
+      }
+    });
   } catch (e) {
+    console.log(`Failed to create Howl for ${src}:`, e);
     return {
       play: () => {
-        const audio = new Audio(src);
-        audio.volume = volume;
-        audio.play().catch(() => {});
+        try {
+          const audio = new Audio(src);
+          audio.volume = volume;
+          audio.play().catch((error) => {
+            console.log(`Audio fallback failed for ${src}:`, error);
+          });
+        } catch (fallbackError) {
+          console.log(`Audio fallback creation failed for ${src}:`, fallbackError);
+        }
       },
     };
   }
