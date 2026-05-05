@@ -91,6 +91,10 @@ export default function ShareCard({ username, onClose }) {
 
     if (username) {
       fetchCard();
+    } else {
+      // No username provided (root path), show editor immediately
+      setLoading(false);
+      setShowEditor(true);
     }
   }, [username]);
 
