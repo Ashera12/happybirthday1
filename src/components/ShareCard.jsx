@@ -212,7 +212,11 @@ export default function ShareCard({ username, onClose }) {
           <p className="text-slate-600">Memuat kartu ucapan...</p>
         </div>
       </div>
-      <div className="container mx-auto px-4 py-8">
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
