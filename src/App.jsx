@@ -62,6 +62,9 @@ export default function App() {
   });
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+
     const saved = localStorage.getItem('kado-final-progress');
     if (saved) {
       const savedStepValue = Number(saved);
@@ -81,6 +84,9 @@ export default function App() {
   const bgMusicRef = useRef(null);
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+
     const audioSources = [
       'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3',
       'https://cdn.pixabay.com/download/audio/2021/11/24/audio_7a6e87cf0f.mp3',
