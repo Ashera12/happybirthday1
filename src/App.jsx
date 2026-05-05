@@ -73,33 +73,44 @@ export default function App() {
         return;
       }
 
-      const audio = new Audio(audioSources[index]);
-      audio.volume = 0.2;
-      audio.loop = true;
-      audio.crossOrigin = 'anonymous';
+      try {
+        const audio = new Audio(audioSources[index]);
+        audio.volume = 0.2;
+        audio.loop = true;
+        audio.crossOrigin = 'anonymous';
 
-      const onCanPlay = () => {
-        audio.play().catch(() => {
+        const onCanPlay = () => {
+          audio.play().catch((error) => {
+            console.log(`Audio play failed for source ${index}:`, error);
+            audio.removeEventListener('canplay', onCanPlay);
+            tryPlayAudio(index + 1);
+          });
+        };
+
+        audio.addEventListener('canplay', onCanPlay);
+        audio.addEventListener('error', () => {
+          console.log(`Audio error for source ${index}`);
           audio.removeEventListener('canplay', onCanPlay);
           tryPlayAudio(index + 1);
         });
-      };
 
-      audio.addEventListener('canplay', onCanPlay);
-      audio.addEventListener('error', () => {
-        audio.removeEventListener('canplay', onCanPlay);
+        bgMusicRef.current = audio;
+      } catch (error) {
+        console.log(`Failed to create audio object for source ${index}:`, error);
         tryPlayAudio(index + 1);
-      });
-
-      bgMusicRef.current = audio;
+      }
     };
 
     tryPlayAudio();
 
     return () => {
       if (bgMusicRef.current) {
-        bgMusicRef.current.pause();
-        bgMusicRef.current.currentTime = 0;
+        try {
+          bgMusicRef.current.pause();
+          bgMusicRef.current.currentTime = 0;
+        } catch (error) {
+          console.log('Error cleaning up audio:', error);
+        }
       }
     };
   }, []);
@@ -184,7 +195,15 @@ export default function App() {
         <main className="relative flex grow items-center justify-center">
           {showCakeEffect && (
             <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center">
-              <img src="https://htmlku.com/0/panda/semprot.gif" alt="" className="h-32 w-32 opacity-30" />
+              <img 
+                src="https://htmlku.com/0/panda/semprot.gif" 
+                alt="" 
+                className="h-32 w-32 opacity-30"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  console.log('Cake effect image failed to load');
+                }}
+              />
             </div>
           )}
           {showFloatingStickers && (
