@@ -1,26 +1,58 @@
-import { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
-import CreateCard from './components/CreateCard';
-import ViewCard from './components/ViewCard';
+import {
+  AnimatePresence,
+  motion,
+} from 'framer-motion';
+
+import Cake from './components/Cake';
+import Envelope from './components/Envelope';
+import FinalMessage from './components/FinalMessage';
+import MemoryGame from './components/MemoryGame';
+import RiddleGate from './components/RiddleGate';
+import ShareView from './components/ShareView';
+import ShareCard from './components/ShareCard';
+
+const steps = [
+  'Teka-teki',
+  'Buka Amplop',
+  'Memory Game',
+  'Tiup Lilin',
+  'Pesan Akhir',
+];
 
 export default function App() {
+  const [step, setStep] = useState(0);
   const [hasLoaded, setHasLoaded] = useState(false);
-  
-  // Get username from URL path (e.g., /john-doe)
-  const [targetUser, setTargetUser] = useState(() => {
+  const [hasStarted, setHasStarted] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+
+  const [savedStep, setSavedStep] = useState(null);
+  const [shareId, setShareId] = useState(() => {
     if (typeof window === 'undefined') return null;
     const pathname = window.location.pathname;
     
-    // Check for /username format
-    if (pathname.startsWith('/') && pathname.length > 1) {
+    // Check for /username format (new)
+    if (pathname.startsWith('/') && pathname.length > 1 && !pathname.startsWith('/share/')) {
       const username = pathname.slice(1);
-      // Allow alphanumeric, hyphens, underscores
       if (/^[a-zA-Z0-9_-]+$/.test(username)) {
         return username;
       }
     }
-    return null;
+    
+    // Check for /share/id format (old)
+    const pathMatch = pathname.match(/^\/share\/([A-Za-z0-9_-]+)/);
+    if (pathMatch) return pathMatch[1];
+    
+    // Check query parameter
+    const query = new URLSearchParams(window.location.search);
+    return query.get('share');
   });
 
   useEffect(() => {
