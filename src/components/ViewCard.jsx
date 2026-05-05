@@ -164,18 +164,18 @@ export default function ViewCard({ username, onBack, onEdit }) {
           <div className="px-6 pb-8">
             <div className="bg-gray-50 rounded-2xl p-6">
               <p className="text-slate-700 text-lg leading-relaxed whitespace-pre-line text-center">
-                {card.message}
+                {card?.message}
               </p>
             </div>
           </div>
 
           {/* Sender */}
-          {card.sender && (
+          {card?.sender && (
             <div className="px-6 pb-8 text-center">
               <div className="inline-flex flex-col items-center">
                 <div className="w-16 h-[1px] bg-slate-300 mb-4" />
                 <p className="text-sm text-slate-500 mb-1">Dengan cinta,</p>
-                <p className="text-lg font-semibold text-slate-800">{card.sender}</p>
+                <p className="text-lg font-semibold text-slate-800">{card?.sender}</p>
               </div>
             </div>
           )}
