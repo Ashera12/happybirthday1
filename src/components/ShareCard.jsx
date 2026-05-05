@@ -13,14 +13,28 @@ export default function ShareCard({ username, onClose }) {
 
   useEffect(() => {
     const fetchCard = async () => {
+      setLoading(true);
+      setError('');
+      
+      // For demo purposes, work without Supabase
       if (!supabase) {
-        setError('Supabase belum dikonfigurasi. Fitur share tidak tersedia.');
+        console.log('Supabase not configured - working in demo mode');
+        // Try to load from localStorage
+        try {
+          const savedCard = localStorage.getItem(`birthday-card-${username}`);
+          if (savedCard) {
+            setCard(JSON.parse(savedCard));
+          } else {
+            setCard(null); // No existing card
+          }
+        } catch (err) {
+          console.log('No saved card found in localStorage');
+          setCard(null);
+        }
         setLoading(false);
         return;
       }
 
-      setLoading(true);
-      setError('');
       try {
         const { data, error: fetchError } = await supabase
           .from('birthday_cards')
@@ -35,7 +49,12 @@ export default function ShareCard({ username, onClose }) {
         setCard(data);
       } catch (err) {
         console.error('Share card fetch error:', err);
-        setError(err?.message || 'Data tidak ditemukan atau link tidak valid.');
+        // Don't set error for missing cards - that's expected for new cards
+        if (err?.code !== 'PGRST116') {
+          setError(err?.message || 'Terjadi kesalahan saat memuat data.');
+        } else {
+          setCard(null); // Card doesn't exist yet
+        }
       } finally {
         setLoading(false);
       }
@@ -51,12 +70,44 @@ export default function ShareCard({ username, onClose }) {
   };
 
   const handleSaveCard = async (cardData) => {
+    setSaving(true);
+    
+    // Demo mode - save to localStorage
     if (!supabase) {
-      setError('Supabase belum dikonfigurasi.');
+      try {
+        // Save image as data URL (already is)
+        const cardToSave = {
+          username,
+          recipient: cardData.recipient,
+          sender: cardData.sender,
+          message: cardData.message,
+          image_url: cardData.imageUrl,
+          image_position: cardData.imagePosition,
+          text_position: cardData.textPosition,
+          image_scale: cardData.imageScale,
+          text_size: cardData.textSize,
+          updated_at: new Date().toISOString()
+        };
+
+        // Save to localStorage for demo
+        localStorage.setItem(`birthday-card-${username}`, JSON.stringify(cardToSave));
+        
+        setCard(cardToSave);
+        setShowEditor(false);
+        setShareUrl(`${window.location.origin}/${username}`);
+        
+        // Show success message
+        alert('Kartu berhasil disimpan (demo mode)!');
+      } catch (err) {
+        console.error('Demo save error:', err);
+        setError('Gagal menyimpan kartu di demo mode.');
+      } finally {
+        setSaving(false);
+      }
       return;
     }
 
-    setSaving(true);
+    // Production mode with Supabase
     try {
       let imageUrl = null;
 
