@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import CardEditor from './CardEditor';
+import CardEditorEnhanced from './CardEditorEnhanced';
 import { supabase } from '../lib/supabaseClient';
 
 export default function ShareCard({ username, onClose }) {
@@ -53,12 +53,15 @@ export default function ShareCard({ username, onClose }) {
             }
           } else if (error.code === 'PGRST116') {
             console.log('ℹ️ No card found in Supabase (normal for new cards)');
+          } else if (data) {
+            console.log('✅ Found card in Supabase:', data);
+            setCard(data);
+            // Also save to localStorage as backup
+            localStorage.setItem(`birthday-card-${username}`, JSON.stringify(data));
           }
-        } else if (data) {
-          console.log('✅ Found card in Supabase:', data);
-          setCard(data);
-          // Also save to localStorage as backup
-          localStorage.setItem(`birthday-card-${username}`, JSON.stringify(data));
+        } catch (supabaseError) {
+          console.log('❌ Supabase connection error:', supabaseError);
+          console.log('🚨 Using localStorage fallback');
         }
       } else {
         console.log('ℹ️ Supabase not configured, using localStorage only');
@@ -80,24 +83,40 @@ export default function ShareCard({ username, onClose }) {
     setSaving(true);
     
     try {
-      console.log('💾 Saving card for username:', username);
+      console.log('💾 Saving enhanced card for username:', username);
       
-      // Prepare card data with all required fields
+      // Prepare card data with ALL enhanced features
       const cardToSave = {
         username: username,
         recipient: cardData.recipient || 'Teman',
         sender: cardData.sender || 'Sahabat',
-        message: cardData.message || '🎉 Happy Birthday!',
+        message: cardData.message || '🎉 Happy Birthday!\n\nSemoga harimu menyenangkan!',
         image_url: cardData.imageUrl || '',
         image_position: cardData.imagePosition || { x: 50, y: 20 },
         text_position: cardData.textPosition || { x: 50, y: 70 },
         image_scale: cardData.imageScale || 1.0,
         text_size: cardData.textSize || 'text-lg',
         theme_color: cardData.themeColor || 'pink',
+        background: cardData.background || 'gradient1',
+        background_color: cardData.backgroundColor || '#ffffff',
+        show_stickers: cardData.showStickers !== false,
+        stickers: cardData.stickers || ['🎉', '🎂', '🎁'],
+        sticker_positions: cardData.stickerPositions || [
+          { emoji: '🎉', x: 10, y: 10 },
+          { emoji: '🎂', x: 80, y: 10 },
+          { emoji: '🎁', x: 50, y: 85 }
+        ],
+        sound_enabled: cardData.soundEnabled !== false,
+        custom_sound: cardData.customSound || 'default',
+        effects: cardData.effects || {
+          confetti: true,
+          sparkles: true,
+          floating: true
+        },
         updated_at: new Date().toISOString()
       };
 
-      console.log('📝 Card data prepared:', cardToSave);
+      console.log('📝 Enhanced card data prepared:', cardToSave);
 
       // ALWAYS save to localStorage first (guaranteed)
       localStorage.setItem(`birthday-card-${username}`, JSON.stringify(cardToSave));
@@ -164,7 +183,7 @@ export default function ShareCard({ username, onClose }) {
       setShareUrl(`${window.location.origin}/${username}`);
       
       // Show success message
-      alert('🎉 Kartu berhasil dibuat dan disimpan!');
+      alert('🎉 Kartu kustom berhasil dibuat dan disimpan!');
       
     } catch (err) {
       console.error('💥 Save card error:', err);
@@ -193,13 +212,6 @@ export default function ShareCard({ username, onClose }) {
           <p className="text-slate-600">Memuat kartu ucapan...</p>
         </div>
       </div>
-    );
-  }
-
-  // Remove error state blocking - always show the card interface
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-violet-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -213,7 +225,22 @@ export default function ShareCard({ username, onClose }) {
 
         {/* Card Display */}
         <div className="max-w-2xl mx-auto">
-          <div className="relative bg-gradient-to-br from-white via-pink-50 to-violet-50 rounded-[2rem] p-8 shadow-xl border border-pink-200">
+          <div className="relative rounded-[2rem] p-8 shadow-xl border border-gray-200" style={card?.background === 'solid' ? { backgroundColor: card?.background_color } : {}}>
+            {/* Stickers */}
+            {card?.show_stickers && card?.sticker_positions?.map((sticker, index) => (
+              <div
+                key={index}
+                className="absolute text-2xl select-none"
+                style={{
+                  left: `${sticker.x}%`,
+                  top: `${sticker.y}%`,
+                  transform: 'translate(-50%, -50%)'
+                }}
+              >
+                {sticker.emoji}
+              </div>
+            ))}
+
             {/* Image */}
             {card?.image_url && (
               <div
@@ -241,19 +268,27 @@ export default function ShareCard({ username, onClose }) {
                 transform: 'translate(-50%, -50%)'
               }}
             >
-              <p className={`${card.text_size || 'text-lg'} font-semibold text-gray-800 whitespace-pre-line`}>
-                {card.message || 'Tulis pesanmu di sini...'}
+              <p className={`${card.text_size || 'text-lg'} font-bold whitespace-pre-line ${getThemeTextClass(card?.theme_color)}`}>
+                {card?.message || 'Tulis pesanmu di sini...'}
               </p>
-              <p className="text-sm text-gray-600 mt-2">
-                Dari: {card.sender || 'Namamu'}
+              <p className={`text-sm mt-2 ${getThemeTextClass(card?.theme_color)}`}>
+                Dari: {card?.sender || 'Namamu'}
               </p>
             </div>
 
             {/* Recipient Name */}
             <div className="absolute top-4 left-4">
-              <p className="text-sm text-pink-600 font-medium">
-                Untuk: {card.recipient || 'Nama Penerima'}
+              <p className={`text-sm font-medium ${getThemeTextClass(card?.theme_color)}`}>
+                Untuk: {card?.recipient || 'Nama Penerima'}
               </p>
+            </div>
+
+            {/* Effects Indicators */}
+            <div className="absolute top-4 right-4 flex gap-2">
+              {card?.effects?.confetti && <span className="text-xs bg-pink-100 text-pink-600 px-2 py-1 rounded-full">🎊</span>}
+              {card?.effects?.sparkles && <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">✨</span>}
+              {card?.effects?.floating && <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">🎈</span>}
+              {card?.sound_enabled && <span className="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full">🔊</span>}
             </div>
 
             {/* Card Size Indicator */}
@@ -280,7 +315,7 @@ export default function ShareCard({ username, onClose }) {
               <button
                 onClick={() => navigator.share?.({ 
                   title: `Kartu Ucapan untuk ${card.recipient}`, 
-                  text: card.message?.slice(0, 100), 
+                  text: card?.message?.slice(0, 100), 
                   url: `${window.location.origin}/${username}` 
                 })}
                 className="border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-50 transition"
@@ -300,16 +335,6 @@ export default function ShareCard({ username, onClose }) {
           </div>
         </div>
       </div>
-
-      {/* Editor Modal */}
-      {showEditor && (
-        <CardEditor
-          card={card}
-          onSave={handleSaveCard}
-          onClose={() => setShowEditor(false)}
-        />
-      )}
-
       {/* Loading Overlay */}
       {saving && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
