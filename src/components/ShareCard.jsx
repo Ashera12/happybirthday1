@@ -48,11 +48,11 @@ export default function ShareCard({ username, onClose }) {
             if (error.message?.includes('column') || error.message?.includes('does not exist')) {
               console.log('🚨 Table structure mismatch - using localStorage only');
               setError('Database structure mismatch. Using local storage.');
+            } else {
+              console.log('⚠️ Other Supabase error:', error.message);
             }
           } else if (error.code === 'PGRST116') {
             console.log('ℹ️ No card found in Supabase (normal for new cards)');
-          } else {
-            throw error;
           }
         } else if (data) {
           console.log('✅ Found card in Supabase:', data);
