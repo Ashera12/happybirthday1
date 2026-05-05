@@ -100,7 +100,7 @@ export default function ShareCard({ username, onClose }) {
         background: cardData.background || 'gradient1',
         background_color: cardData.backgroundColor || '#ffffff',
         show_stickers: cardData.showStickers !== false,
-        stickers: cardData.stickers || ['🎉', '🎂', '🎁'],
+        stickers: cardData.stickers ? parseStickers(cardData.stickers).join(',') : '🎉,🎂,🎁',
         sticker_positions: cardData.stickerPositions || [
           { emoji: '🎉', x: 10, y: 10 },
           { emoji: '🎂', x: 80, y: 10 },
