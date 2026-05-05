@@ -41,7 +41,7 @@ export default function UsernameInput({ onSubmit }) {
             Masukkan nama untuk link kartu custom-mu
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-4">
             <div>
               <input
                 type="text"
@@ -49,6 +49,11 @@ export default function UsernameInput({ onSubmit }) {
                 onChange={(e) => {
                   setUsername(e.target.value);
                   setError('');
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSubmit(e);
+                  }
                 }}
                 placeholder="Contoh: nabila, amelia-18, budi-2024"
                 className="w-full px-4 py-4 rounded-2xl border-2 border-pink-200 focus:border-pink-500 focus:outline-none text-center text-lg"
@@ -59,12 +64,12 @@ export default function UsernameInput({ onSubmit }) {
             </div>
 
             <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold py-4 rounded-2xl hover:opacity-90 transition"
+              onClick={handleSubmit}
+              className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold py-4 rounded-2xl hover:opacity-90 transition active:scale-95"
             >
               Lanjutkan →
             </button>
-          </form>
+          </div>
 
           <div className="mt-6 text-sm text-slate-500">
             <p>Link akan jadi: <span className="font-mono text-pink-600">/{username || 'nama-kamu'}</span></p>
