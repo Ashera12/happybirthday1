@@ -135,18 +135,18 @@ export default function ViewCard({ username, onBack, onEdit }) {
           {/* Recipient */}
           <div className="px-6 pt-8 pb-4 text-center">
             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-              {card.recipient}
+              {card?.recipient}
             </h1>
             <div className="w-24 h-1 bg-gradient-to-r from-pink-400 to-purple-400 mx-auto mt-4 rounded-full" />
           </div>
 
           {/* Photo */}
-          {card.image_url ? (
+          {card?.image_url ? (
             <div className="px-6 mb-6">
               <div className="rounded-2xl overflow-hidden shadow-lg">
                 <img 
-                  src={card.image_url} 
-                  alt={card.recipient}
+                  src={card?.image_url} 
+                  alt={card?.recipient}
                   className="w-full h-64 md:h-80 object-cover"
                   onError={(e) => { e.target.style.display = 'none'; }}
                 />
