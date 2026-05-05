@@ -16,12 +16,27 @@ export default function ShareCard({ username, onClose }) {
       setLoading(true);
       setError('');
       
-      console.log('Loading card for:', username);
+      console.log('🔍 Loading card for username:', username);
       
-      // Try Supabase first if available
+      // Always try localStorage first as guaranteed fallback
+      const savedCard = localStorage.getItem(`birthday-card-${username}`);
+      if (savedCard) {
+        try {
+          const parsedCard = JSON.parse(savedCard);
+          console.log('✅ Found card in localStorage:', parsedCard);
+          setCard(parsedCard);
+          setLoading(false);
+          return;
+        } catch (parseError) {
+          console.log('❌ Error parsing localStorage card:', parseError);
+          localStorage.removeItem(`birthday-card-${username}`);
+        }
+      }
+      
+      // Try Supabase if available
       if (supabase) {
         try {
-          console.log('Trying Supabase...');
+          console.log('🔍 Trying Supabase...');
           const { data, error } = await supabase
             .from('birthday_cards')
             .select('*')
@@ -29,47 +44,24 @@ export default function ShareCard({ username, onClose }) {
             .single();
 
           if (error && error.code !== 'PGRST116') {
+            console.log('❌ Supabase error:', error);
+            if (error.message?.includes('column') || error.message?.includes('does not exist')) {
+              console.log('🚨 Table structure mismatch - using localStorage only');
+              setError('Database structure mismatch. Using local storage.');
+            }
+          } else if (error.code === 'PGRST116') {
+            console.log('ℹ️ No card found in Supabase (normal for new cards)');
+          } else {
             throw error;
           }
-
-          if (data) {
-            console.log('Found card in Supabase:', data);
-            setCard(data);
-            // Also save to localStorage as backup
-            localStorage.setItem(`birthday-card-${username}`, JSON.stringify(data));
-          } else {
-            // Try localStorage as fallback
-            const savedCard = localStorage.getItem(`birthday-card-${username}`);
-            if (savedCard) {
-              const parsedCard = JSON.parse(savedCard);
-              console.log('Found card in localStorage:', parsedCard);
-              setCard(parsedCard);
-            } else {
-              console.log('No card found in Supabase or localStorage');
-              setCard(null);
-            }
-          }
-        } catch (err) {
-          console.log('Supabase error, falling back to localStorage:', err);
-          // Fallback to localStorage
-          const savedCard = localStorage.getItem(`birthday-card-${username}`);
-          if (savedCard) {
-            const parsedCard = JSON.parse(savedCard);
-            setCard(parsedCard);
-          } else {
-            setCard(null);
-          }
+        } else if (data) {
+          console.log('✅ Found card in Supabase:', data);
+          setCard(data);
+          // Also save to localStorage as backup
+          localStorage.setItem(`birthday-card-${username}`, JSON.stringify(data));
         }
       } else {
-        // No Supabase, use localStorage only
-        console.log('Supabase not available, using localStorage');
-        const savedCard = localStorage.getItem(`birthday-card-${username}`);
-        if (savedCard) {
-          const parsedCard = JSON.parse(savedCard);
-          setCard(parsedCard);
-        } else {
-          setCard(null);
-        }
+        console.log('ℹ️ Supabase not configured, using localStorage only');
       }
       
       setLoading(false);
