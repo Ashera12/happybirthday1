@@ -1,52 +1,87 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import ShareCard from './components/ShareCard';
+import UsernameInput from './components/UsernameInput';
+import CardEditor from './components/CardEditor';
+import ViewCard from './components/ViewCard';
 
 export default function App() {
-  const [username, setUsername] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [currentPath, setCurrentPath] = useState('/');
+  const [draftUsername, setDraftUsername] = useState('');
 
   useEffect(() => {
-    // Parse username from URL path (e.g., /nabila)
-    const pathname = window.location.pathname;
-    const pathSegments = pathname.split('/').filter(Boolean);
+    setCurrentPath(window.location.pathname);
     
-    if (pathSegments.length > 0) {
-      const potentialUsername = pathSegments[0];
-      // Check if it's not a reserved path
-      if (!['share', 'api', 'static'].includes(potentialUsername.toLowerCase())) {
-        setUsername(potentialUsername);
-      }
-    }
-    
-    setIsLoading(false);
+    // Listen for popstate (back/forward buttons)
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  if (isLoading) {
+  const navigate = (path) => {
+    window.history.pushState({}, '', path);
+    setCurrentPath(path);
+  };
+
+  // Parse path
+  const pathSegments = currentPath.split('/').filter(Boolean);
+  const firstSegment = pathSegments[0] || '';
+  
+  // Determine what to render
+  const isRoot = currentPath === '/' || currentPath === '';
+  const isEditPage = firstSegment === 'edit';
+  const isViewPage = firstSegment && !['edit', 'share', 'api'].includes(firstSegment);
+  const viewUsername = isViewPage ? firstSegment : null;
+
+  // Handle username submission from root page
+  const handleUsernameSubmit = (username) => {
+    setDraftUsername(username);
+    navigate('/edit');
+  };
+
+  // Handle card creation complete
+  const handleCardCreated = (username) => {
+    navigate(`/${username}`);
+  };
+
+  // Render appropriate component
+  if (isRoot) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center">
-        <motion.div 
-          initial={{ opacity: 0 }} 
-          animate={{ opacity: 1 }}
-          className="text-center"
-        >
-          <div className="w-16 h-16 border-4 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Memuat...</p>
-        </motion.div>
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+        <UsernameInput onSubmit={handleUsernameSubmit} />
       </div>
     );
   }
 
+  if (isEditPage) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+        <CardEditor 
+          username={draftUsername} 
+          onSave={handleCardCreated}
+          onBack={() => navigate('/')}
+        />
+      </div>
+    );
+  }
+
+  if (isViewPage && viewUsername) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+        <ViewCard 
+          username={viewUsername}
+          onBack={() => navigate('/')}
+          onEdit={() => navigate('/edit')}
+        />
+      </div>
+    );
+  }
+
+  // Fallback to root
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-      <ShareCard 
-        username={username} 
-        onClose={() => {
-          window.history.pushState({}, '', '/');
-          setUsername(null);
-          window.location.reload();
-        }} 
-      />
+      <UsernameInput onSubmit={handleUsernameSubmit} />
     </div>
   );
 }
